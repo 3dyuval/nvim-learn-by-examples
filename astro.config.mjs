@@ -8,27 +8,17 @@ export default defineConfig({
 	base: '/nvim-learn-by-examples',
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [
-				{
-					icon: 'github',
-					label: 'GitHub',
-					href: 'https://github.com/withastro/starlight'
-				}
-			],
+			title: 'Neovim Learn by Examples',
+			description: 'Practical Neovim examples and workflows',
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Examples',
 					items: [
 						{
-							label: 'Large Files/Scratch buffer',
+							label: 'Large Files & Scratch Buffers',
 							slug: 'guides/large-files-scatch-buffer'
 						}
 					]
-				},
-				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' }
 				}
 			]
 		})

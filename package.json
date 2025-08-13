@@ -1,5 +1,6 @@
 {
   "name": "nvim-learn-by-examples",
+  "description": "Practical Neovim examples and workflows",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
