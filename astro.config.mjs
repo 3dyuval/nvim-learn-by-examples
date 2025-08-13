@@ -22,7 +22,7 @@ export default defineConfig({
 					items: [
 						{
 							label: 'Large Files/Scratch buffer',
-							slug: 'large-files-scatch-buffer'
+							slug: 'guides/large-files-scatch-buffer'
 						}
 					]
 				},
