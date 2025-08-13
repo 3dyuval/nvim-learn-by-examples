@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://3dyuval.github.io',
+	base: '/nvim-learn-by-examples',
 	integrations: [
 		starlight({
 			title: 'My Docs',
