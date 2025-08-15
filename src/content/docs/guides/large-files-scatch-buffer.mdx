@@ -1,0 +1,267 @@
+---
+title: Big Files / Big Fires
+description: Performance optimization techniques for handling large files efficiently in Neovim.
+---
+
+import VimEnhancer from '../../../components/VimEnhancer.astro';
+
+# Managing Large Files in Neovim
+
+## Level 1: Emergency Room (Copy-Paste Heroes)
+
+### "Seven Things They Don't Tell You About Text Editors"
+
+You open up a big file and you start seeing lags and slowdowns.
+
+Why is it? Big files make too many computations you don't see.
+
+Usually what we see is what's important. In the first solution we look to minimize unwanted operations.
+
+First disable things that run in the background.
+
+So we disable things we don't need in the background so they don't take unneeded memory:
+
+<VimEnhancer description="Emergency performance rescue" />
+
+```vim
+:syntax off
+```
+
+Easy!
+
+Your editor breathes again. The syntax highlighting was eating all the cycles.
+
+Want more speed? Turn off other background processes:
+
+<VimEnhancer description="More emergency tweaks" />
+
+```vim
+:set synmaxcol=200
+:set maxmempattern=5000
+```
+
+**Duration:** 30 seconds of copy-paste.
+**Classification:** Instant relief.
+
+### "Why Your Computer Hates Big Files (And What You Can Do About It)"
+
+You need to experiment with chunks of that monster file.
+
+But you don't want to touch the original. What if you break something?
+
+The solution is isolation. We make a workspace that vanishes when we're done.
+
+So we create a scratch buffer that gives us freedom to experiment:
+
+<VimEnhancer description="Create scratch workspace" />
+
+```vim
+:vnew
+```
+
+Easy!
+
+Now you have a safe space. Copy parts of your big file here. Break it. Fix it. No consequences.
+
+Need syntax highlighting back in your scratch area?
+
+<VimEnhancer description="Make scratch buffer pretty" />
+
+```vim
+:set ft=json
+```
+
+**Duration:** 1 minute to master.
+**Classification:** Essential safety net.
+
+## Level 2: Smart Escapes (External Tools to the Rescue)
+
+### "Things I Don't Understand About Software Development"
+
+Your JSON file is so big that even looking at it hurts.
+
+Why fight the editor? Sometimes the right tool is outside the editor.
+
+The solution is delegation. Let specialized tools handle the heavy lifting.
+
+So we pipe the file to tools built for this exact problem:
+
+<VimEnhancer description="Browse JSON like a book" />
+
+```bash
+jq '.' huge.json | less
+```
+
+Easy!
+
+Now you're browsing formatted JSON with `j/k` navigation. Search with `/`. Quit with `q`.
+
+Need specific pieces of data?
+
+<VimEnhancer description="JSON surgery with jq" />
+
+```bash
+jq '.users[0]' huge.json
+jq '.items[] | select(.price > 100)' huge.json
+```
+
+**Duration:** 5 minutes to feel confident.
+**Classification:** External tool magic.
+
+### "Why Everything Has to Be So Damn Complicated"
+
+Every time you open a big file, you remember to turn things off. Then you forget. Then you suffer.
+
+Why remember when the computer can remember for you?
+
+The solution is automation. We teach Neovim to detect big files and handle them automatically.
+
+So we configure automatic optimization that triggers before the file even loads:
+
+<VimEnhancer description="Auto-disable features for huge files" />
+
+```lua
+vim.api.nvim_create_autocmd("BufReadPre", {
+  pattern = "*",
+  callback = function()
+    local file_size = vim.fn.getfsize(vim.fn.expand("%"))
+    if file_size > 1024 * 1024 then
+      vim.opt_local.syntax = "off"
+      vim.opt_local.filetype = ""
+      vim.opt_local.undolevels = -1
+    end
+  end,
+})
+```
+
+Easy!
+
+Files over 1MB get the performance treatment automatically. You never think about it again.
+
+**Duration:** 2 minutes to configure forever.
+**Classification:** Set-and-forget automation.
+
+## Level 3: Power User Territory (Install Required)
+
+### "The Stuff Nobody Tells You About Being a Programmer"
+
+jq is great but sometimes you want to click around and explore.
+
+Why type commands when you can navigate visually?
+
+The solution is interactive exploration. We bring a JSON browser into our workflow.
+
+So we install fx and pipe our buffer content to it:
+
+<VimEnhancer description="Install the JSON explorer" />
+
+```bash
+npm install -g fx
+```
+
+<VimEnhancer description="Send buffer to fx viewer" />
+
+```vim
+:%w !fx
+```
+
+Easy!
+
+Arrow keys navigate the structure. Space expands nodes. `/` searches. It's like a file manager for JSON.
+
+**Duration:** 10 minutes including installation.
+**Classification:** Interactive power tool.
+
+### "Modern Technology: Making Simple Things Impossible Since 1995"
+
+fx is awesome but you have to leave Neovim to use it.
+
+Why leave your editor when you can bring the tool inside?
+
+The solution is integration. We embed fx in a terminal split.
+
+So we create a keymap that saves and opens fx without leaving Neovim:
+
+<VimEnhancer description="fx integration keybinding" />
+
+```lua
+vim.keymap.set('n', '<leader>fx', function()
+  vim.cmd('write')
+  vim.cmd('split term://fx ' .. vim.fn.expand('%'))
+end, { desc = 'Open JSON in fx' })
+```
+
+Easy!
+
+Press `<leader>fx` and boom - fx opens in a split with your current file.
+
+**Duration:** 15 minutes to configure and test.
+**Classification:** Workflow integration.
+
+## Level 4: Ninja Status (Custom Workflows)
+
+### "Have You Ever Noticed How Programmers Love to Overcomplicate Everything?"
+
+fx is nice but you're a Vim person. You want hjkl navigation.
+
+Why adapt to new keybindings when you can use the ones in your muscle memory?
+
+The solution is Vim-style tools. We find JSON browsers that speak your language.
+
+So we install jless which navigates exactly like Vim:
+
+<VimEnhancer description="Install jless JSON browser" />
+
+```bash
+cargo install jless
+jless huge.json
+```
+
+Easy!
+
+hjkl moves around. Nodes collapse and expand. Search works. It's Vim but for JSON.
+
+**Duration:** 20 minutes including Rust setup.
+**Classification:** Vim-native power tool.
+
+### "The Weird Things People Do With Computers"
+
+You do great work in scratch buffers but then lose it when you close Neovim.
+
+Why lose good work just because it started as an experiment?
+
+The solution is smart saving. We make it easy to persist scratch work.
+
+So we create a keymap that prompts for a filename and saves our scratch buffer:
+
+<VimEnhancer description="Smart scratch buffer saving" />
+
+```lua
+vim.keymap.set('n', '<leader>ws', function()
+  local filename = vim.fn.input('Save as: ')
+  if filename ~= '' then
+    vim.cmd('write ' .. filename)
+  end
+end, { desc = 'Save scratch as...' })
+```
+
+Easy!
+
+Press `<leader>ws`, type a filename, and your scratch work becomes permanent.
+
+**Duration:** 30 minutes to integrate into workflow.
+**Classification:** Workflow preservation.
+
+## The Strategy
+
+**Level 1:** When things get slow, turn stuff off. Start here.
+
+**Level 2:** When you need to explore, use the right tools. jq and automation.
+
+**Level 3:** When you work with big files regularly, integrate the tools. fx inside Neovim.
+
+**Level 4:** When you want total control, build custom workflows. Vim-style tools and smart saving.
+
+Master scratch buffers first. They're your safety net for everything else.
+
+Each level builds on the last. But you can jump around based on what you need right now.

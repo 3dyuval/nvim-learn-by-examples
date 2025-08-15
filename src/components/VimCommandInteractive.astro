@@ -1,0 +1,146 @@
+---
+export interface Props {
+  commands: string | string[];
+  description?: string;
+  showLineNumbers?: boolean;
+}
+
+const { commands, description, showLineNumbers = false } = Astro.props;
+const commandArray = Array.isArray(commands) ? commands : [commands];
+const commandId = `vim-cmd-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="vim-command-interactive">
+  <div class="vim-command-header">
+    <div class="vim-command-info">
+      <span class="vim-command-label">Vim</span>
+      {description && <span class="vim-command-description">{description}</span>}
+    </div>
+    <button 
+      class="vim-command-copy" 
+      data-command-id={commandId}
+      data-commands={JSON.stringify(commandArray)}
+      aria-label="Copy commands"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <span class="copy-text">Copy</span>
+    </button>
+  </div>
+  <pre class="vim-command-content" id={commandId}><code>{
+    showLineNumbers 
+      ? commandArray.map((cmd, i) => `${(i + 1).toString().padStart(2, ' ')} ${cmd}`).join('\n')
+      : commandArray.join('\n')
+  }</code></pre>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.vim-command-copy').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const commands = JSON.parse(btn.dataset.commands || '[]');
+        const text = commands.join('\n');
+        
+        try {
+          await navigator.clipboard.writeText(text);
+          const copyText = btn.querySelector('.copy-text');
+          if (copyText) {
+            copyText.textContent = 'Copied!';
+            setTimeout(() => {
+              copyText.textContent = 'Copy';
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .vim-command-interactive {
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--sl-color-black);
+    border: 1px solid var(--sl-color-gray-5);
+  }
+
+  .vim-command-header {
+    padding: 0.75rem 1rem;
+    background: linear-gradient(to bottom, var(--sl-color-gray-6), var(--sl-color-gray-7));
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vim-command-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .vim-command-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sl-color-green);
+    padding: 0.25rem 0.5rem;
+    background: var(--sl-color-gray-7);
+    border-radius: 0.25rem;
+  }
+
+  .vim-command-description {
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-2);
+  }
+
+  .vim-command-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--sl-color-gray-6);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.375rem;
+    color: var(--sl-color-gray-2);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+
+  .vim-command-copy:hover {
+    background: var(--sl-color-gray-5);
+    color: var(--sl-color-white);
+  }
+
+  .vim-command-copy:active {
+    transform: scale(0.95);
+  }
+
+  .vim-command-content {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: var(--sl-color-black);
+    overflow-x: auto;
+  }
+
+  .vim-command-content code {
+    color: var(--sl-color-green);
+    font-family: 'JetBrains Mono', 'Fira Code', var(--sl-font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .copy-text {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,254 @@
+---
+export interface Props {
+  description?: string;
+  showLineNumbers?: boolean;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+}
+
+const { 
+  description, 
+  showLineNumbers = false, 
+  collapsible = false,
+  defaultCollapsed = false 
+} = Astro.props;
+
+const enhancerId = `vim-enhancer-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div 
+  class="vim-enhancer" 
+  data-enhancer-id={enhancerId}
+  data-show-line-numbers={showLineNumbers}
+  data-collapsible={collapsible}
+  data-default-collapsed={defaultCollapsed}
+  data-description={description}
+>
+  <!-- This component enhances the next code block -->
+</div>
+
+<script>
+  function initVimEnhancers() {
+    document.querySelectorAll('.vim-enhancer').forEach(enhancer => {
+      const enhancerEl = enhancer as HTMLElement;
+      const showLineNumbers = enhancerEl.dataset.showLineNumbers === 'true';
+      const collapsible = enhancerEl.dataset.collapsible === 'true';
+      const defaultCollapsed = enhancerEl.dataset.defaultCollapsed === 'true';
+      const description = enhancerEl.dataset.description || '';
+      
+      // Find the next pre element (code block)
+      let nextElement = enhancerEl.nextElementSibling;
+      while (nextElement && nextElement.tagName !== 'PRE') {
+        nextElement = nextElement.nextElementSibling;
+      }
+      
+      if (!nextElement) return;
+      
+      const codeBlock = nextElement as HTMLElement;
+      const codeElement = codeBlock.querySelector('code');
+      if (!codeElement) return;
+      
+      // Create wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'vim-enhanced-block';
+      
+      // Create header
+      const header = document.createElement('div');
+      header.className = 'vim-enhanced-header';
+      
+      const info = document.createElement('div');
+      info.className = 'vim-enhanced-info';
+      
+      const label = document.createElement('span');
+      label.className = 'vim-enhanced-label';
+      label.textContent = 'VIM';
+      info.appendChild(label);
+      
+      if (description) {
+        const desc = document.createElement('span');
+        desc.className = 'vim-enhanced-description';
+        desc.textContent = description;
+        info.appendChild(desc);
+      }
+      
+      header.appendChild(info);
+      
+      // Create controls
+      const controls = document.createElement('div');
+      controls.className = 'vim-enhanced-controls';
+      
+      if (collapsible) {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'vim-enhanced-toggle';
+        toggleBtn.innerHTML = `
+          <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          <span class="toggle-text">${defaultCollapsed ? 'Show' : 'Hide'}</span>
+        `;
+        toggleBtn.addEventListener('click', () => {
+          const isCollapsed = wrapper.classList.contains('collapsed');
+          wrapper.classList.toggle('collapsed');
+          toggleBtn.querySelector('.toggle-text')!.textContent = isCollapsed ? 'Hide' : 'Show';
+        });
+        controls.appendChild(toggleBtn);
+      }
+      
+      // Copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'vim-enhanced-copy';
+      copyBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span class="copy-text">Copy</span>
+      `;
+      
+      copyBtn.addEventListener('click', async () => {
+        const text = codeElement.textContent || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          const copyText = copyBtn.querySelector('.copy-text');
+          if (copyText) {
+            copyText.textContent = 'Copied!';
+            setTimeout(() => {
+              copyText.textContent = 'Copy';
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      });
+      
+      controls.appendChild(copyBtn);
+      header.appendChild(controls);
+      
+      // Add line numbers if requested
+      if (showLineNumbers) {
+        const lines = (codeElement.textContent || '').split('\n');
+        const numberedLines = lines.map((line, i) => 
+          `${(i + 1).toString().padStart(3, ' ')} ${line}`
+        ).join('\n');
+        codeElement.textContent = numberedLines;
+      }
+      
+      // Build the enhanced block
+      codeBlock.parentNode!.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(header);
+      wrapper.appendChild(codeBlock);
+      
+      // Apply initial collapsed state
+      if (defaultCollapsed && collapsible) {
+        wrapper.classList.add('collapsed');
+      }
+      
+      // Remove the enhancer element
+      enhancerEl.remove();
+    });
+  }
+
+  // Run immediately and also on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVimEnhancers);
+  } else {
+    initVimEnhancers();
+  }
+</script>
+
+<style is:global>
+  .vim-enhanced-block {
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--sl-color-black);
+    border: 1px solid var(--sl-color-gray-5);
+  }
+  
+  .vim-enhanced-block.collapsed pre {
+    display: none;
+  }
+  
+  .vim-enhanced-header {
+    padding: 0.75rem 1rem;
+    background: linear-gradient(to bottom, var(--sl-color-gray-6), var(--sl-color-gray-7));
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .vim-enhanced-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .vim-enhanced-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sl-color-green);
+    padding: 0.25rem 0.5rem;
+    background: var(--sl-color-gray-7);
+    border-radius: 0.25rem;
+  }
+  
+  .vim-enhanced-description {
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-2);
+  }
+  
+  .vim-enhanced-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .vim-enhanced-copy,
+  .vim-enhanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--sl-color-gray-6);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.375rem;
+    color: var(--sl-color-gray-2);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+  
+  .vim-enhanced-copy:hover,
+  .vim-enhanced-toggle:hover {
+    background: var(--sl-color-gray-5);
+    color: var(--sl-color-white);
+  }
+  
+  .vim-enhanced-copy:active,
+  .vim-enhanced-toggle:active {
+    transform: scale(0.95);
+  }
+  
+  .vim-enhanced-block.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+  }
+  
+  .toggle-icon {
+    transition: transform 0.2s;
+  }
+  
+  .vim-enhanced-block pre {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+  
+  @media (max-width: 640px) {
+    .copy-text,
+    .toggle-text {
+      display: none;
+    }
+  }
+</style>

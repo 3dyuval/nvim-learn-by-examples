@@ -1,0 +1,57 @@
+---
+export interface Props {
+  commands: string | string[];
+  description?: string;
+}
+
+const { commands, description } = Astro.props;
+const commandArray = Array.isArray(commands) ? commands : [commands];
+---
+
+<div class="vim-command">
+  <div class="vim-command-header">
+    <span class="vim-command-label">Vim Command</span>
+    {description && <span class="vim-command-description">{description}</span>}
+  </div>
+  <pre class="vim-command-content"><code>{commandArray.join('\n')}</code></pre>
+</div>
+
+<style>
+  .vim-command {
+    margin: 1rem 0;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .vim-command-header {
+    padding: 0.5rem 1rem;
+    background: var(--sl-color-gray-6);
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vim-command-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+
+  .vim-command-description {
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-3);
+  }
+
+  .vim-command-content {
+    margin: 0;
+    padding: 1rem;
+    background: var(--sl-color-gray-7);
+  }
+
+  .vim-command-content code {
+    color: var(--sl-color-green);
+    font-family: var(--sl-font-mono);
+  }
+</style>
